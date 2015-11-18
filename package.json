@@ -1,13 +1,28 @@
 {
-  "name": "hotcold",
+  "name": "ipfs-crdts",
+  "description": "crdts on ipfs",
   "version": "0.0.1",
+  "main": "index.js",
+  "author": "Kristoffer Ström <kristoffer@rymdkoloni.se>",
+  "license": "MIT",
   "dependencies": {
     "async": "^1.5.0",
+    "blake2s-js": "^1.0.3",
+    "ipfs-obj": "^4.0.0",
     "lodash": "^3.10.1"
   },
   "devDependencies": {
-    "deep-equal": "^1.0.1",
-    "ipfs-api": "^2.5.1",
-    "mocha": "^2.3.3"
-  }
+    "ipfs-api": "^2.7.4",
+    "mocha": "^2.3.3",
+    "precommit-hook": "^3.0.0"
+  },
+  "scripts": {
+    "test": "mocha test",
+    "lint": "standard",
+    "validate": "npm ls"
+  },
+  "pre-commit": [
+    "lint",
+    "test"
+  ]
 }
