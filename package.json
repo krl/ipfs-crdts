@@ -1,7 +1,7 @@
 {
   "name": "ipfs-crdts",
   "description": "crdts on ipfs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "index.js",
   "author": "Kristoffer Ström <kristoffer@rymdkoloni.se>",
   "license": "MIT",
@@ -9,12 +9,17 @@
     "async": "^1.5.0",
     "blake2s-js": "^1.0.3",
     "ipfs-obj": "^4.0.0",
+    "json-stable-stringify": "^1.0.0",
     "lodash": "^3.10.1"
   },
   "devDependencies": {
     "ipfs-api": "^2.7.4",
     "mocha": "^2.3.3",
     "precommit-hook": "^3.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krl/ipfs-crdts"
   },
   "scripts": {
     "test": "mocha test",
