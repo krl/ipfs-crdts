@@ -1,7 +1,7 @@
 {
   "name": "ipfs-crdts",
   "description": "crdts on ipfs",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "index.js",
   "author": "Kristoffer Ström <kristoffer@rymdkoloni.se>",
   "license": "MIT",

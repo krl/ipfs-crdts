@@ -331,6 +331,36 @@ describe('HotSet', function () {
           done()
         })
     })
+
+    it('should union with deleted elements', function (done) {
+      async.parallel([
+        function (cb) { setA.remove(Math.floor(count * 0.5), cb) },
+        function (cb) { setB.remove(Math.floor(count * 1.5), cb) }
+      ], function (err, res) {
+        if (err) throw err
+        var setAr = res[0]
+        var setBr = res[1]
+
+        setAr.union(setBr, function (err, res) {
+          if (err) throw err
+          async.map(_.range(count * 2), function (idx, cb) {
+            res.get(idx, function (err, res) {
+              if (err) throw err
+              if (idx === Math.floor(count * 0.5) ||
+                  idx === Math.floor(count * 1.5)) {
+                assert.equal(res, undefined)
+              } else {
+                assert.equal(res, idx)
+              }
+              cb()
+            })
+          }, function (err) {
+            if (err) throw err
+            done()
+          })
+        })
+      })
+    })
   })
 
   describe('notIn', function () {

@@ -1,15 +1,13 @@
 var u = require('./util.js')
+var async = require('async')
 
 module.exports = function (ipo) {
   var HAMT = require('./hamt.js')(ipo)
 
   var HotSet = ipo.obj(__filename, function (hot, cold) {
-    this.data = {}
-    if (hot) {
-      this.data.hot = hot
-    }
-    if (cold) {
-      this.data.cold = cold
+    this.data = {
+      hot: hot || new HAMT(),
+      cold: cold || new HAMT()
     }
   })
 
@@ -28,23 +26,8 @@ module.exports = function (ipo) {
     var data = {}
     data[idx] = { el: el,
                   hash: hash }
-    var toAdd = new HAMT(data)
 
-    if (self.data.hot) {
-      self.call('hot', 'union', toAdd, 0, function (err, newHot) {
-        if (err) return cb(err)
-        if (self.data.cold) {
-          self.call('hot', 'notIn', 0, self.data.cold, function (err, res) {
-            if (err) return cb(err)
-            cb(null, new HotSet(res, self.data.cold))
-          })
-        } else {
-          cb(null, new HotSet(newHot))
-        }
-      })
-    } else {
-      cb(null, new HotSet(toAdd))
-    }
+    self.union(new HotSet(new HAMT(data)), cb)
   }
 
   HotSet.prototype.remove = function (el, cb) {
@@ -55,19 +38,9 @@ module.exports = function (ipo) {
     if (!self.data.cold) self.data.cold = new HAMT()
 
     var data = {}
-    data[idx] = { el: el,
-                  hash: hash }
-    var coldAdd = new HAMT(data)
+    data[idx] = { el: el, hash: hash }
 
-    self.call('cold', 'union', coldAdd, 0, function (err, newCold) {
-      if (err) return cb(err)
-
-      self.call('hot', 'notIn', newCold, 0, function (err, newHot) {
-        if (err) return cb(err)
-
-        cb(null, new HotSet(newHot, newCold))
-      })
-    })
+    self.union(new HotSet(null, new HAMT(data)), cb)
   }
 
   HotSet.prototype.get = function (el, cb) {
@@ -84,25 +57,28 @@ module.exports = function (ipo) {
   }
 
   HotSet.prototype.union = function (set, cb) {
-    if (this.data.hot) {
-      this.call('hot', 'union', set.data.hot, 0, function (err, res) {
+    var self = this
+
+    async.parallel([
+      function (cb) { self.call('hot', 'union', set.data.hot, 0, cb) },
+      function (cb) { self.call('cold', 'union', set.data.cold, 0, cb) }
+    ], function (err, res) {
+      if (err) return cb(err)
+      var hot = res[0]
+      var cold = res[1]
+
+      hot.notIn(cold, 0, function (err, remainder) {
         if (err) return cb(err)
-        cb(null, new HotSet(res))
+        cb(null, new HotSet(remainder, cold))
       })
-    } else {
-      cb(null, set)
-    }
+    })
   }
 
   HotSet.prototype.notIn = function (set, cb) {
-    if (this.data.hot) {
-      this.call('hot', 'notIn', set.data.hot, 0, function (err, res) {
-        if (err) return cb(err)
-        cb(null, new HotSet(res))
-      })
-    } else {
-      cb(null, set)
-    }
+    this.call('hot', 'notIn', set.data.hot, 0, function (err, res) {
+      if (err) return cb(err)
+      cb(null, new HotSet(res))
+    })
   }
 
   return HotSet

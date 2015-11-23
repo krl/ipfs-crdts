@@ -49,7 +49,7 @@ module.exports = function (ipo) {
   HAMT.prototype.union = function (tounion, depth, cb) {
     var self = this
 
-    // tounion might be a ref.
+    // tounion might be a Ref.
     tounion.load(function (err, tounion) {
       if (err) return cb(err)
 
@@ -120,6 +120,7 @@ module.exports = function (ipo) {
             data[i] = res[i]
           }
         }
+
         cb(null, new HAMT(data))
       })
     })
@@ -128,7 +129,7 @@ module.exports = function (ipo) {
   HAMT.prototype.notIn = function (other, depth, cb) {
     var self = this
 
-    // other might be a ref.
+    // other might be a Ref.
     other.load(function (err, other) {
       if (err) return cb(err)
 
