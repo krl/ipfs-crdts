@@ -1,4 +1,4 @@
-var B2 = require('blake2s-js')
+var B2 = require('blake2s')
 var stringify = require('json-stable-stringify')
 var _ = require('lodash')
 
@@ -19,8 +19,8 @@ module.exports = {
   },
   digest: function (value) {
     var hasher = new B2(HASHBYTES)
-    hasher.update(new Buffer(stringify(value)))
-    return hasher.hexDigest()
+    hasher.update(stringify(value))
+    return hasher.digest('hex')
   },
   xorStrings: function (strings) {
     if (strings.length === 0) {

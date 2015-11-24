@@ -63,7 +63,17 @@ module.exports = function (ipo) {
           if (b) {
             if (a.hash && b.hash) {
               if (a.hash === b.hash) {
-                mapcb(null, a)
+                if (typeof a.el.union === 'function') {
+                  a.el.union(b.el, function (err, res) {
+                    if (err) return cb(err)
+                    mapcb(null, {
+                      hash: a.hash,
+                      el: res
+                    })
+                  })
+                } else {
+                  mapcb(null, a)
+                }
               } else {
                 dataA = {}
                 dataB = {}
