@@ -13,7 +13,11 @@ module.exports = function (ipo) {
   }
 
   UnionMap.prototype.get = function (key, cb) {
-    this.data.map.get(u.digest(key), 0, cb)
+    this.data.map.get(u.digest(key), 0, function (err, res) {
+      if (err) return cb(err)
+      if (!res) return cb(null, new HotSet())
+      cb(null, res)
+    })
   }
 
   UnionMap.prototype.add = function (key, el, cb) {
@@ -21,6 +25,24 @@ module.exports = function (ipo) {
     var set = new HotSet()
 
     set.add(el, function (err, res) {
+      if (err) return cb(err)
+
+      var hash = u.digest(key)
+      var idx = u.index(hash, 0)
+      var data = {}
+      data[idx] = { el: res, hash: hash }
+
+      self.union(new UnionMap(new HAMT(data)), function (err, res) {
+        cb(err, res)
+      })
+    })
+  }
+
+  UnionMap.prototype.remove = function (key, el, cb) {
+    var self = this
+    var set = new HotSet()
+
+    set.remove(el, function (err, res) {
       if (err) return cb(err)
 
       var hash = u.digest(key)

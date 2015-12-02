@@ -25,6 +25,16 @@ describe('UnionMap', function () {
       })
     })
 
+    it('should get empty set on non-existing key', function (done) {
+      var map = new UnionMap()
+
+      map.get('foo', function (err, gottenset) {
+        if (err) throw err
+        assert.equal(gottenset.meta.count, 0)
+        done()
+      })
+    })
+
     it('should merge un-overlapping maps', function (done) {
       var map = new UnionMap()
 
@@ -114,6 +124,24 @@ describe('UnionMap', function () {
             if (err) throw err
             assert.equal(res[0][0], 'baz')
             assert.equal(res[1][0], 'baz')
+            done()
+          })
+        })
+      })
+    })
+  })
+
+  describe('basic', function () {
+    it('should remove values from keys', function (done) {
+      var map = new UnionMap()
+
+      map.add('foo', 'bar', function (err, res) {
+        if (err) throw err
+        res.remove('foo', 'bar', function (err, res) {
+          if (err) throw err
+          res.get('foo', function (err, gottenset) {
+            if (err) throw err
+            assert.equal(gottenset.meta.count, 0)
             done()
           })
         })
