@@ -2,6 +2,7 @@ var u = require('./util.js')
 
 module.exports = function (ipo) {
   var HAMT = require('./hamt.js')(ipo)
+  var HotSet = require('./hotset.js')(ipo)
 
   var UnionMap = ipo.obj(__filename, function (map) {
     this.data = {map: map || new HAMT()}
@@ -17,12 +18,20 @@ module.exports = function (ipo) {
 
   UnionMap.prototype.add = function (key, el, cb) {
     var self = this
-    var hash = u.digest(key)
-    var idx = u.index(hash, 0)
-    var data = {}
-    data[idx] = { el: el, hash: hash }
+    var set = new HotSet()
 
-    self.union(new UnionMap(new HAMT(data)), cb)
+    set.add(el, function (err, res) {
+      if (err) return cb(err)
+
+      var hash = u.digest(key)
+      var idx = u.index(hash, 0)
+      var data = {}
+      data[idx] = { el: res, hash: hash }
+
+      self.union(new UnionMap(new HAMT(data)), function (err, res) {
+        cb(err, res)
+      })
+    })
   }
 
   UnionMap.prototype.union = function (other, cb) {

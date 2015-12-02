@@ -1,5 +1,8 @@
-var B2 = require('blake2s')
-var stringify = require('json-stable-stringify')
+// var B2 = require('blake2s')
+// var stringify = require('json-stable-stringify')
+
+var jhash = require('jsonhash')
+
 var _ = require('lodash')
 
 var BRANCHING = 32
@@ -18,9 +21,7 @@ module.exports = {
     return Math.floor(by / (265 / BRANCHING))
   },
   digest: function (value) {
-    var hasher = new B2(HASHBYTES)
-    hasher.update(stringify(value))
-    return hasher.digest('hex')
+    return jhash(value)
   },
   xorStrings: function (strings) {
     if (strings.length === 0) {
